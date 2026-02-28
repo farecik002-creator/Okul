@@ -1,0 +1,109 @@
+Node.js + Express üzerinde çalışan mevcut match-3 oyununa SADECE frontend animasyon katmanı ekle.
+
+ÖNEMLİ:
+- Server dosyasına dokunma (index.js / server.js değiştirme)
+- Route değiştirme
+- Express config değiştirme
+- package.json değiştirme
+- Yeni dependency ekleme YOK
+- Backend mantığına dokunma
+- Sadece public klasörü içindeki CSS ve client JS dosyasına ekleme yap
+
+AMAÇ:
+Grid taşları sade görünmesin.
+Premium, canlı, animasyonlu olsun.
+Match olduğunda enerji efekti versin.
+
+====================================================
+FRONTEND KURALLARI
+====================================================
+
+- Plain CSS
+- Vanilla JS
+- import/export yok
+- DOM oluşturma yok
+- Sadece class toggle
+- .tile class’ı üzerinden çalış
+
+====================================================
+1) IDLE CANLILIK
+====================================================
+
+.tile:
+- Hafif inner glow
+- Çok yavaş floating animasyonu (scale 1 → 1.02 → 1)
+- 3s infinite
+- Performans için sadece transform
+
+====================================================
+2) HOVER
+====================================================
+
+- translateY(-5px)
+- scale(1.08)
+- brightness(1.1)
+- 0.18s ease-out
+
+====================================================
+3) MATCH
+====================================================
+
+.energy-impact:
+- scale(1 → 1.25)
+- brightness artışı
+- 0.12s
+
+Sonra:
+- rotate hafif
+- scale(1.25 → 0)
+- opacity 1 → 0
+- blur artışı
+- 0.45s cubic-bezier(.2,.8,.2,1)
+
+====================================================
+4) ENERJİ PSEUDO ORB
+====================================================
+
+.tile.energy-green::after vb
+
+- 14px glowing orb
+- radial-gradient
+- güçlü glow
+- translate ile yukarı/sağa süzülme hissi
+- scale küçülmeli
+- opacity düşmeli
+- 0.6s
+
+====================================================
+5) BAR IMPACT
+====================================================
+
+.hp-impact
+.shield-impact
+.mana-impact
+.skill-impact
+.attack-impact
+
+- 0.25s pulse
+- scale(1 → 1.05 → 1)
+- brightness artışı
+
+====================================================
+PERFORMANS
+====================================================
+
+- Sadece transform, opacity, filter
+- Reflow yok
+- Layout shift yok
+- will-change kullan
+
+====================================================
+SADECE:
+- public içindeki CSS’e eklenecek stiller
+- client JS’e eklenecek helper class toggle fonksiyonları
+
+üret.
+
+Server dosyalarına dokunma.
+Backend değiştirme.
+Sistemi bozma.

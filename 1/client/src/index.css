@@ -1,0 +1,340 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-sans: 'Inter', sans-serif;
+  --font-display: 'Cinzel', serif;
+
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-gold: hsl(45 93% 47%);
+  --color-gold-light: hsl(45 93% 70%);
+  --color-gold-dark: hsl(45 93% 25%);
+  --color-board-bg: rgba(20, 10, 30, 0.7);
+  --color-panel-bg: rgba(10, 5, 15, 0.85);
+  
+  --color-hp-red: hsl(0 84% 60%);
+  --color-hp-green: hsl(142 71% 45%);
+  --color-exp-gold: hsl(45 93% 50%);
+
+  --color-gem-red: hsl(350 80% 55%);
+  --color-gem-blue: hsl(220 80% 60%);
+  --color-gem-green: hsl(130 70% 50%);
+  --color-gem-yellow: hsl(45 90% 55%);
+  --color-gem-purple: hsl(280 70% 60%);
+  --color-gem-cyan: hsl(190 80% 60%);
+
+  /* Animations */
+  --animate-combo-pop: combo-pop 0.5s ease-out forwards;
+  --animate-float: float 3s ease-in-out infinite;
+  --animate-pulse-glow: pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --animate-gem-drop: gem-drop 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  --animate-gem-swap: gem-swap 0.2s ease-in-out;
+  --animate-match-glow: match-glow 0.4s ease-out;
+  --animate-particle-up: particle-up 2s linear infinite;
+}
+
+:root {
+  --background: 260 50% 5%;
+  --foreground: 45 90% 90%;
+  --border: 45 93% 30%;
+}
+
+@layer base {
+  body {
+    @apply font-sans antialiased bg-background text-foreground overflow-hidden touch-none select-none;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display;
+  }
+}
+
+@keyframes combo-pop {
+  0% { transform: scale(0.5); opacity: 0; }
+  50% { transform: scale(1.3); opacity: 1; filter: drop-shadow(0 0 10px rgba(251, 191, 36, 0.8)); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 5px rgba(251, 191, 36, 0.2), inset 0 0 5px rgba(251, 191, 36, 0.2); }
+  50% { box-shadow: 0 0 15px rgba(251, 191, 36, 0.6), inset 0 0 10px rgba(251, 191, 36, 0.4); border-color: rgba(251, 191, 36, 1); }
+}
+
+@keyframes gem-drop {
+  from { transform: translateY(-100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes match-glow {
+  0% { filter: brightness(1) drop-shadow(0 0 0px transparent); transform: scale(1); }
+  50% { filter: brightness(2) drop-shadow(0 0 20px rgba(255,255,255,0.8)); transform: scale(1.1); z-index: 10; }
+  100% { filter: brightness(0) drop-shadow(0 0 0px transparent); transform: scale(0); opacity: 0; }
+}
+
+@keyframes particle-up {
+  0% { transform: translateY(0) scale(1); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateY(-100px) scale(0); opacity: 0; }
+}
+
+.gem-base {
+  @apply relative w-full h-full rounded-md shadow-md transition-transform flex items-center justify-center;
+  box-shadow: inset 0 0 10px rgba(255,255,255,0.4), inset 0 -4px 8px rgba(0,0,0,0.4), 0 2px 4px rgba(0,0,0,0.5);
+  border: 1px solid rgba(255,255,255,0.2);
+}
+
+.gem-base::after {
+  content: '';
+  @apply absolute top-1 left-1 right-1 h-1/3 rounded-full opacity-50;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.8), transparent);
+}
+
+.gem-red { background: radial-gradient(circle at 30% 30%, var(--color-gem-red), #600000); }
+.gem-blue { background: radial-gradient(circle at 30% 30%, var(--color-gem-blue), #000060); }
+.gem-green { background: radial-gradient(circle at 30% 30%, var(--color-gem-green), #004000); }
+.gem-yellow { background: radial-gradient(circle at 30% 30%, var(--color-gem-yellow), #605000); }
+.gem-purple { background: radial-gradient(circle at 30% 30%, var(--color-gem-purple), #300050); }
+.gem-cyan { background: radial-gradient(circle at 30% 30%, var(--color-gem-cyan), #004050); }
+
+.fantasy-border {
+  @apply relative rounded-lg;
+  border: 2px solid var(--color-gold-dark);
+  background: var(--color-panel-bg);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.8), inset 0 0 15px rgba(0,0,0,0.8);
+}
+
+.fantasy-border::before {
+  content: '';
+  @apply absolute inset-0 rounded-lg pointer-events-none;
+  border: 1px solid rgba(251, 191, 36, 0.3);
+}
+
+.gold-text {
+  background: linear-gradient(to bottom, #fff7d6, #fcd34d, #b45309);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 2px 2px rgba(0,0,0,0.8));
+}
+
+.progress-bar-bg {
+  @apply relative overflow-hidden rounded-full;
+  background: rgba(0,0,0,0.6);
+  border: 2px solid var(--color-gold-dark);
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.8), 0 1px 2px rgba(255,255,255,0.1);
+}
+
+.progress-bar-fill {
+  @apply h-full transition-all duration-500 ease-out relative;
+}
+
+@keyframes sweep {
+  0% { transform: translateX(-100%) skewX(-20deg); }
+  20%, 100% { transform: translateX(200%) skewX(-20deg); }
+}
+
+@keyframes flash-green {
+  0% { background-color: rgba(34, 197, 94, 0); }
+  50% { background-color: rgba(34, 197, 94, 0.5); }
+  100% { background-color: rgba(34, 197, 94, 0); }
+}
+
+@keyframes flash-red {
+  0% { background-color: rgba(239, 68, 68, 0); }
+  50% { background-color: rgba(239, 68, 68, 0.5); }
+  100% { background-color: rgba(239, 68, 68, 0); }
+}
+
+@keyframes shimmer {
+  0% { opacity: 0.3; }
+  50% { opacity: 0.6; }
+  100% { opacity: 0.3; }
+}
+
+.animate-sweep {
+  animation: sweep 5s infinite linear;
+}
+
+.flash-green {
+  animation: flash-green 0.3s ease-out;
+}
+
+.flash-red {
+  animation: flash-red 0.2s ease-out;
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite ease-in-out;
+}
+
+.progress-bar-fill::after {
+  content: '';
+  @apply absolute inset-0;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.4) 0%, transparent 50%, rgba(0,0,0,0.2) 100%);
+}
+
+/* Premium Visuals Upgrade */
+.tile.premium-match {
+  position: relative;
+  animation: premiumImpactPlus 0.32s cubic-bezier(.2,.8,.2,1) forwards;
+  box-shadow:
+    0 0 25px rgba(255,255,255,1),
+    0 0 50px rgba(255,255,255,0.8),
+    0 0 80px rgba(255,255,255,0.5);
+  filter: brightness(1.3);
+}
+
+@keyframes premiumImpactPlus {
+  0%   { transform: scale(1); opacity: 1; }
+  30%  { transform: scale(1.2); }
+  55%  { transform: scale(0.85); }
+  75%  { transform: scale(1.05); }
+  100% { transform: scale(0); opacity: 0; }
+}
+
+.tile.premium-match::after {
+  content: "";
+  position: absolute;
+  inset: -8px;
+  border-radius: 14px;
+  border: 3px solid rgba(255,255,255,0.9);
+  box-shadow: 0 0 25px rgba(255,255,255,0.6);
+  animation: shockExpandStable 0.4s ease-out forwards;
+  pointer-events: none;
+}
+
+@keyframes shockExpandStable {
+  0%   { transform: scale(0.4); opacity: 1; }
+  100% { transform: scale(2.5); opacity: 0; }
+}
+
+.board.premium-shake {
+  animation: premiumShakePlus 0.28s ease;
+}
+
+@keyframes premiumShakePlus {
+  0% { transform: translate(0,0); }
+  20% { transform: translate(-3px,2px); }
+  40% { transform: translate(3px,-2px); }
+  60% { transform: translate(-2px,1px); }
+  80% { transform: translate(2px,-1px); }
+  100% { transform: translate(0,0); }
+}
+
+body.combo-glow-1 { box-shadow: 0 0 25px rgba(0,200,255,0.2) inset; }
+body.combo-glow-2 { box-shadow: 0 0 45px rgba(0,200,255,0.3) inset; }
+body.combo-glow-3 { box-shadow: 0 0 70px rgba(0,200,255,0.4) inset; }
+body.combo-glow-4 { box-shadow: 0 0 100px rgba(0,200,255,0.5) inset; }
+body.combo-glow-5 { box-shadow: 0 0 140px rgba(0,200,255,0.6) inset; }
+
+.tile.premium-fall {
+  animation: premiumFallPlus 0.34s cubic-bezier(.2,.8,.2,1);
+  filter: brightness(1.15);
+}
+
+@keyframes premiumFallPlus {
+  0%   { transform: translateY(-30px); }
+  75%  { transform: translateY(0); }
+  88%  { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+
+/* IDLE CANLILIK */
+.tile {
+  position: relative;
+  will-change: transform, filter;
+  animation: idle-float 3s ease-in-out infinite;
+  transition: transform 0.18s ease-out, filter 0.18s ease-out;
+}
+
+@keyframes idle-float {
+  0%, 100% { transform: scale(1); filter: drop-shadow(0 0 2px rgba(255,255,255,0.2)); }
+  50% { transform: scale(1.02); filter: drop-shadow(0 0 5px rgba(255,255,255,0.4)); }
+}
+
+/* HOVER */
+.tile:hover {
+  transform: translateY(-5px) scale(1.08) !important;
+  filter: brightness(1.1) drop-shadow(0 5px 15px rgba(0,0,0,0.3));
+  z-index: 10;
+}
+
+/* MATCH - energy-impact */
+.energy-impact {
+  animation: energy-impact-anim 0.57s cubic-bezier(.2,.8,.2,1) forwards;
+  pointer-events: none;
+}
+
+@keyframes energy-impact-anim {
+  0% {
+    transform: scale(1);
+    filter: brightness(1);
+    opacity: 1;
+  }
+  20% {
+    transform: scale(1.25);
+    filter: brightness(1.5);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0) rotate(15deg);
+    filter: brightness(2) blur(10px);
+    opacity: 0;
+  }
+}
+
+/* ENERJİ PSEUDO ORB */
+.tile::after {
+  content: '';
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 20;
+}
+
+.tile.energy-active::after {
+  animation: energy-orb-anim 0.6s ease-out forwards;
+}
+
+.tile.energy-red::after { background: radial-gradient(circle, #ff3b3b, transparent 70%); box-shadow: 0 0 15px #ff3b3b; }
+.tile.energy-blue::after { background: radial-gradient(circle, #00bfff, transparent 70%); box-shadow: 0 0 15px #00bfff; }
+.tile.energy-green::after { background: radial-gradient(circle, #00ff88, transparent 70%); box-shadow: 0 0 15px #00ff88; }
+.tile.energy-yellow::after { background: radial-gradient(circle, #ffd700, transparent 70%); box-shadow: 0 0 15px #ffd700; }
+.tile.energy-purple::after { background: radial-gradient(circle, #a855f7, transparent 70%); box-shadow: 0 0 15px #a855f7; }
+.tile.energy-cyan::after { background: radial-gradient(circle, #00ffff, transparent 70%); box-shadow: 0 0 15px #00ffff; }
+
+@keyframes energy-orb-anim {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+    top: 50%;
+    left: 50%;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(20px, -40px) scale(0);
+    top: 50%;
+    left: 50%;
+  }
+}
+
+/* BAR IMPACT */
+.hp-impact, .shield-impact, .mana-impact, .skill-impact, .attack-impact {
+  animation: bar-impact-pulse 0.25s ease-out;
+}
+
+@keyframes bar-impact-pulse {
+  0%, 100% { transform: scale(1); filter: brightness(1); }
+  50% { transform: scale(1.05); filter: brightness(1.3); }
+}
