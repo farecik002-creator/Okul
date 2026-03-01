@@ -33,7 +33,7 @@ export default function PlayerInfo({
       </div>
       
       {/* Shield Bar */}
-      <div className="w-full h-5 progress-bar-bg p-[1px] relative flex items-center justify-center overflow-hidden rounded-lg border border-purple-500/30">
+      <div id="shield-bar" className="w-full h-5 progress-bar-bg p-[1px] relative flex items-center justify-center overflow-hidden rounded-lg border border-purple-500/30 shield-impact-target">
         <div 
           className={cn(
             "absolute left-0 top-0 bottom-0 bg-gradient-to-r from-purple-900 via-purple-600 to-purple-400 transition-all duration-300 ease-out",
@@ -49,7 +49,7 @@ export default function PlayerInfo({
       </div>
 
       {/* HP Bar */}
-      <div className="w-full h-7 progress-bar-bg p-[2px] relative flex items-center justify-center overflow-hidden rounded-xl border border-white/10">
+      <div className="w-full h-7 progress-bar-bg p-[2px] relative flex items-center justify-center overflow-hidden rounded-xl border border-white/10 hp-impact-target">
         <div className="absolute inset-0 p-[2px]">
           <div 
             className={cn(
@@ -88,6 +88,7 @@ export default function PlayerInfo({
       {/* Skills */}
       <div className="flex gap-3 mt-1">
         <SkillButton 
+          id="heal-bar"
           name="HEAL" 
           icon={<Heart size={16} className="text-yellow-200 fill-yellow-200" />} 
           color="from-yellow-700 via-yellow-500 to-yellow-300" 
@@ -96,6 +97,7 @@ export default function PlayerInfo({
           onClick={onHeal}
         />
         <SkillButton 
+          id="skill-bar"
           name="SKILL" 
           icon={<Sword size={16} className="text-sky-200 fill-sky-200" />} 
           color="from-sky-700 via-sky-500 to-sky-300" 
@@ -109,6 +111,7 @@ export default function PlayerInfo({
 }
 
 interface SkillButtonProps {
+  id: string;
   name: string;
   icon: React.ReactNode;
   color: string;
@@ -117,11 +120,12 @@ interface SkillButtonProps {
   onClick: () => void;
 }
 
-function SkillButton({ name, icon, color, glowColor, charge, onClick }: SkillButtonProps) {
+function SkillButton({ id, name, icon, color, glowColor, charge, onClick }: SkillButtonProps) {
   const isReady = charge >= 100;
   
   return (
     <button 
+      id={id}
       onClick={() => isReady && onClick()}
       disabled={!isReady}
       className={cn(

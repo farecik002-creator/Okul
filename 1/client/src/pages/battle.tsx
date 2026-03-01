@@ -89,8 +89,6 @@ export default function GameContainer() {
 
   const handleWin = (stars: number) => {
     setGameState(prev => {
-      const isPerfect = Object.values({ ...prev.completedLevels, [currentLevel]: stars }).every(s => s === 3) && Object.keys({ ...prev.completedLevels, [currentLevel]: stars }).length === LEVELS_COUNT;
-      
       let newExp = prev.playerStats.exp + (stars * 20);
       let newLevel = prev.playerStats.level;
       if (newExp >= 100) {
@@ -358,7 +356,6 @@ function MysticMap({ unlockedLevel, completedLevels, playerStats, onSelectLevel 
 function Battle({ level, playerStats, onWin, onExit }: { level: number; playerStats: any; onWin: (stars: number) => void; onExit: () => void }) {
   const { toast } = useToast();
   
-  // Stats state
   const [currentLevel, setCurrentLevel] = useState(playerStats.level);
   const [maxHp, setMaxHp] = useState(playerStats.maxHp);
   const [baseDamage, setBaseDamage] = useState(playerStats.attack);
@@ -383,27 +380,18 @@ function Battle({ level, playerStats, onWin, onExit }: { level: number; playerSt
   const [isShieldGlow, setIsShieldGlow] = useState(false);
   
   const [particles, setParticles] = useState<{ id: number; x: number; y: number }[]>([]);
-  
   const [floatingTexts, setFloatingTexts] = useState<{ id: number; text: string; color: string; x: number; y: number }[]>([]);
   const [levelUpOptions, setLevelUpOptions] = useState<null | { type: 'hp' | 'atk' }[]>(null);
 
   const spawnFloatingText = (text: string, color: string, isPlayer: boolean = true) => {
     const id = Math.random();
-    const newText = {
-      id,
-      text,
-      color,
-      x: isPlayer ? 20 : 70,
-      y: isPlayer ? 80 : 20
-    };
+    const newText = { id, text, color, x: isPlayer ? 20 : 70, y: isPlayer ? 80 : 20 };
     setFloatingTexts(prev => [...prev, newText]);
-    setTimeout(() => {
-      setFloatingTexts(prev => prev.filter(t => t.id !== id));
-    }, 800);
+    setTimeout(() => setFloatingTexts(prev => prev.filter(t => t.id !== id)), 800);
   };
 
   const spawnParticles = (count: number) => {
-    const newParticles = [...Array(count)].map((_, i) => ({
+    const newParticles = [...Array(count)].map(() => ({
       id: Math.random(),
       x: 30 + Math.random() * 40,
       y: 40 + Math.random() * 20
@@ -414,15 +402,6 @@ function Battle({ level, playerStats, onWin, onExit }: { level: number; playerSt
     }, 1000);
   };
 
-  const checkLevelUp = (currentExp: number) => {
-    if (currentExp >= maxExp) {
-      setLevelUpOptions([
-        { type: 'hp' },
-        { type: 'atk' }
-      ]);
-    }
-  };
-
   const handleLevelUp = (type: 'hp' | 'atk') => {
     if (type === 'hp') {
       setMaxHp((prev: number) => prev + 15);
@@ -430,7 +409,6 @@ function Battle({ level, playerStats, onWin, onExit }: { level: number; playerSt
     } else {
       setBaseDamage((prev: number) => prev + 5);
     }
-    
     setExp((prev: number) => prev - maxExp);
     setCurrentLevel((prev: number) => prev + 1);
     setMaxExp((prev: number) => prev + 25);
@@ -438,13 +416,14 @@ function Battle({ level, playerStats, onWin, onExit }: { level: number; playerSt
   };
 
   const handleMatchWithType = (count: number, currentCombo: number, type: string) => {
-    if (levelUpOptions) return; // Pause during level up
+    if (levelUpOptions) return;
 
-    // Progression logic
     const gainedExp = count * 2;
     setExp((prev: number) => {
       const newExp = prev + gainedExp;
-      checkLevelUp(newExp);
+      if (newExp >= maxExp) {
+        setLevelUpOptions([{ type: 'hp' }, { type: 'atk' }]);
+      }
       return newExp;
     });
     setIsExpGlow(true);
@@ -480,6 +459,9 @@ function Battle({ level, playerStats, onWin, onExit }: { level: number; playerSt
     } else if (type === "yellow") {
       setHealCharge(prev => Math.min(100, prev + (count * 10)));
     }
+
+    const baseDmg = count * (baseDamage / 2);
+    const comboMultiplier = 1 + (currentCombo - 1) * 0.5;
     const totalDamage = Math.floor(baseDmg * comboMultiplier);
     setEnemyHp(prev => Math.max(0, prev - totalDamage));
     if (currentCombo > 1) spawnParticles(5);
@@ -547,14 +529,9 @@ function Battle({ level, playerStats, onWin, onExit }: { level: number; playerSt
         ))}
       </AnimatePresence>
 
-      <div className="w-[68%] h-full flex flex-col justify-between py-6 px-4 z-10 backdrop-blur-[1px] bg-black/30 relative">
+      <div id="attack-area" className="w-[68%] h-full flex flex-col justify-between py-6 px-4 z-10 backdrop-blur-[1px] bg-black/30 relative">
         <div className="w-full flex flex-col gap-1 relative">
-          <EnemyInfo 
-            name={enemyName} 
-            level={level} 
-            hp={enemyHp} 
-            maxHp={enemyMaxHp} 
-          />
+          <EnemyInfo name={enemyName} level={level} hp={enemyHp} maxHp={enemyMaxHp} />
           {critDamage && (
             <motion.div 
               initial={{ scale: 0.5, opacity: 0 }}
@@ -585,13 +562,8 @@ function Battle({ level, playerStats, onWin, onExit }: { level: number; playerSt
         </div>
         <PlayerInfo 
           level={currentLevel} hp={playerHp} maxHp={maxHp} exp={exp} maxExp={maxExp}
-          shield={shield}
-          skillCharge={skillCharge}
-          healCharge={healCharge}
-          isHealGlow={isHealGlow}
-          isDamageGlow={isDamageGlow}
-          isExpGlow={isExpGlow}
-          isShieldGlow={isShieldGlow}
+          shield={shield} skillCharge={skillCharge} healCharge={healCharge}
+          isHealGlow={isHealGlow} isDamageGlow={isDamageGlow} isExpGlow={isExpGlow} isShieldGlow={isShieldGlow}
           onHeal={() => { 
             if (healCharge >= 100) {
               const amount = 40;
@@ -612,7 +584,6 @@ function Battle({ level, playerStats, onWin, onExit }: { level: number; playerSt
         />
       </div>
 
-      {/* Level Up Overlay */}
       <AnimatePresence>
         {levelUpOptions && (
           <motion.div 
@@ -627,7 +598,6 @@ function Battle({ level, playerStats, onWin, onExit }: { level: number; playerSt
               className="w-full max-w-xs bg-[#1a1a1a] rounded-3xl border-4 border-yellow-600/50 p-6 shadow-[0_0_50px_rgba(202,138,4,0.3)] relative overflow-hidden"
             >
               <div className="absolute inset-0 bg-gradient-to-b from-yellow-600/10 to-transparent pointer-events-none" />
-              
               <motion.h2 
                 animate={{ scale: [1, 1.05, 1], opacity: [0.8, 1, 0.8] }}
                 transition={{ duration: 2, repeat: Infinity }}
@@ -635,23 +605,15 @@ function Battle({ level, playerStats, onWin, onExit }: { level: number; playerSt
               >
                 LEVEL UP
               </motion.h2>
-
               <div className="flex flex-col gap-5 w-full">
                 <UpgradeCard 
-                  title="VITALITY"
-                  value="+15 Max HP"
-                  subtext="Increase survivability"
-                  icon={<Heart size={24} className="text-emerald-400" />}
-                  color="emerald"
+                  title="VITALITY" value="+15 Max HP" subtext="Increase survivability"
+                  icon={<Heart size={24} className="text-emerald-400" />} color="emerald"
                   onClick={() => handleLevelUp('hp')}
                 />
-
                 <UpgradeCard 
-                  title="STRENGTH"
-                  value="+5 Base Damage"
-                  subtext="Increase attack power"
-                  icon={<Sword size={24} className="text-red-400" />}
-                  color="red"
+                  title="STRENGTH" value="+5 Base Damage" subtext="Increase attack power"
+                  icon={<Sword size={24} className="text-red-400" />} color="red"
                   onClick={() => handleLevelUp('atk')}
                 />
               </div>
@@ -665,13 +627,11 @@ function Battle({ level, playerStats, onWin, onExit }: { level: number; playerSt
 
 function UpgradeCard({ title, value, subtext, icon, color, onClick }: any) {
   const [clicked, setClicked] = useState(false);
-  
   const handleClick = () => {
     if (clicked) return;
     setClicked(true);
     onClick();
   };
-
   return (
     <motion.button 
       initial={{ y: 20, opacity: 0 }}

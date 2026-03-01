@@ -1,5 +1,6 @@
 import { GemType } from "@/hooks/useMatch3";
 import { cn } from "@/lib/utils";
+import { useEffect, useRef } from "react";
 
 interface BoardProps {
   board: { id: string; type: GemType }[][];
@@ -14,66 +15,89 @@ export default function Board({
   onSelect,
   isProcessing,
 }: BoardProps) {
+  const prevBoard = useRef<{ id: string; type: GemType }[][]>([]);
 
   const gemImageMap: Record<string, string> = {
     blue: "/gems/blue.png",
     red: "/gems/red.png",
     green: "/gems/green.png",
-    purp: "/gems/purp.png",
     purple: "/gems/purp.png",
-    yell: "/gems/yell.png",
     yellow: "/gems/yell.png",
-    cya: "/gems/cya.png",
     cyan: "/gems/cya.png",
   };
 
-  /* IŞIK GİBİ SÜZÜLEN ENERJİ */
-  const spawnStream = (r: number, c: number, type: string) => {
-    const tile = document.querySelector(
-      `[data-pos="${r},${c}"]`
-    ) as HTMLElement;
-
+  /* FLYING LIGHT ENERGY EFFECT */
+  const spawnFlyingEnergy = (r: number, c: number, type: GemType) => {
+    const tile = document.querySelector(`[data-pos="${r},${c}"]`) as HTMLElement;
     if (!tile) return;
 
-    // CYAN sadece patlama
-    if (type === "cyan" || type === "cya") {
-      tile.classList.add("cyan-burst");
-      setTimeout(() => tile.classList.remove("cyan-burst"), 400);
-      return;
-    }
-
-    const orb = document.createElement("div");
-    orb.className = `energy-stream ${type}`;
-    document.body.appendChild(orb);
-
     const rect = tile.getBoundingClientRect();
-
     const startX = rect.left + rect.width / 2;
     const startY = rect.top + rect.height / 2;
 
-    orb.style.left = `${startX}px`;
-    orb.style.top = `${startY}px`;
+    if (type === "cyan") {
+      const explosion = document.createElement("div");
+      explosion.className = "cyan-burst-effect";
+      explosion.style.left = `${startX}px`;
+      explosion.style.top = `${startY}px`;
+      document.body.appendChild(explosion);
+      setTimeout(() => explosion.remove(), 600);
+      return;
+    }
 
-    // Hafif sağa sola kıvrımlı süzülme
-    const offsetX = (Math.random() - 0.5) * 150;
-    const offsetY = -280 - Math.random() * 120;
+    const targetMap: Record<string, string> = {
+      green: "#hp-bar",
+      blue: "#skill-bar",
+      red: "#attack-area",
+      purple: "#shield-bar",
+      yellow: "#heal-bar",
+    };
 
-    requestAnimationFrame(() => {
-      orb.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(0.3)`;
-      orb.style.opacity = "0";
+    const targetSelector = targetMap[type];
+    const targetEl = targetSelector ? document.querySelector(targetSelector) : null;
+    if (!targetEl) return;
+
+    const targetRect = targetEl.getBoundingClientRect();
+    const endX = targetRect.left + targetRect.width / 2;
+    const endY = targetRect.top + targetRect.height / 2;
+
+    const particle = document.createElement("div");
+    particle.className = cn("flying-energy-particle", type);
+    particle.style.left = `${startX}px`;
+    particle.style.top = `${startY}px`;
+    document.body.appendChild(particle);
+
+    const animation = particle.animate([
+      { transform: "translate(-50%, -50%) scale(1)", opacity: 1 },
+      { transform: `translate(${endX - startX}px, ${endY - startY}px) scale(0.5)`, opacity: 0 }
+    ], {
+      duration: 800,
+      easing: "cubic-bezier(0.2, 0.8, 0.2, 1)"
     });
 
-    setTimeout(() => {
-      orb.remove();
-    }, 900);
+    animation.onfinish = () => particle.remove();
   };
+
+  useEffect(() => {
+    if (prevBoard.current.length > 0) {
+      board.forEach((row, r) => {
+        row.forEach((gem, c) => {
+          const prevGem = prevBoard.current[r]?.[c];
+          if (prevGem && prevGem.type !== "empty" && gem.type === "empty") {
+            spawnFlyingEnergy(r, c, prevGem.type);
+          }
+        });
+      });
+    }
+    prevBoard.current = board.map(row => row.map(gem => ({ ...gem })));
+  }, [board]);
 
   return (
     <div className="relative w-full aspect-square fantasy-border p-2 z-10 flex items-center justify-center board">
       <div
         className="w-full h-full grid gap-1"
         style={{
-          gridTemplateColumns: `repeat(${board.length}, minmax(0, 1fr))`,
+          gridTemplateColumns: `repeat(${board[0]?.length || 8}, minmax(0, 1fr))`,
           gridTemplateRows: `repeat(${board.length}, minmax(0, 1fr))`,
         }}
       >
@@ -90,7 +114,6 @@ export default function Board({
                 data-testid={`gem-${r}-${c}`}
                 onClick={() => {
                   if (!isEmpty) {
-                    spawnStream(r, c, gem.type);
                     onSelect(r, c);
                   }
                 }}

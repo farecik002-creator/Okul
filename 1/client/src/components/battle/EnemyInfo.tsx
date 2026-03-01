@@ -11,7 +11,7 @@ export default function EnemyInfo({ name = "VOID WEAVER", level, hp, maxHp }: En
   const hpPercentage = Math.max(0, Math.min(100, (hp / maxHp) * 100));
 
   return (
-    <div className="w-full flex flex-col gap-2 z-10">
+    <div id="hp-bar" className="w-full flex flex-col gap-2 z-10">
       <div className="flex flex-col">
         <div className="text-xl text-white font-display flex items-center drop-shadow-md uppercase">
           {name} <span className="ml-2 text-sm opacity-80">Lv. {level}</span>
@@ -21,7 +21,7 @@ export default function EnemyInfo({ name = "VOID WEAVER", level, hp, maxHp }: En
         </div>
       </div>
       
-      <div className="w-full h-6 progress-bar-bg p-[2px] relative flex items-center justify-center overflow-hidden">
+      <div className="w-full h-6 progress-bar-bg p-[2px] relative flex items-center justify-center overflow-hidden hp-impact-target">
         <div className="absolute inset-0 p-[2px]">
           <div 
             className="progress-bar-fill bg-[var(--color-hp-red)] rounded-full h-full"
