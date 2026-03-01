@@ -27,6 +27,47 @@ export default function Board({
     cyan: "/gems/cya.png",
   };
 
+  /* IŞIK GİBİ SÜZÜLEN ENERJİ */
+  const spawnStream = (r: number, c: number, type: string) => {
+    const tile = document.querySelector(
+      `[data-pos="${r},${c}"]`
+    ) as HTMLElement;
+
+    if (!tile) return;
+
+    // CYAN sadece patlama
+    if (type === "cyan" || type === "cya") {
+      tile.classList.add("cyan-burst");
+      setTimeout(() => tile.classList.remove("cyan-burst"), 400);
+      return;
+    }
+
+    const orb = document.createElement("div");
+    orb.className = `energy-stream ${type}`;
+    document.body.appendChild(orb);
+
+    const rect = tile.getBoundingClientRect();
+
+    const startX = rect.left + rect.width / 2;
+    const startY = rect.top + rect.height / 2;
+
+    orb.style.left = `${startX}px`;
+    orb.style.top = `${startY}px`;
+
+    // Hafif sağa sola kıvrımlı süzülme
+    const offsetX = (Math.random() - 0.5) * 150;
+    const offsetY = -280 - Math.random() * 120;
+
+    requestAnimationFrame(() => {
+      orb.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(0.3)`;
+      orb.style.opacity = "0";
+    });
+
+    setTimeout(() => {
+      orb.remove();
+    }, 900);
+  };
+
   return (
     <div className="relative w-full aspect-square fantasy-border p-2 z-10 flex items-center justify-center board">
       <div
@@ -40,7 +81,6 @@ export default function Board({
           row.map((gem, c) => {
             const isSelected = selected?.r === r && selected?.c === c;
             const isEmpty = gem.type === "empty";
-
             const gemImage = gemImageMap[gem.type];
 
             return (
@@ -48,7 +88,12 @@ export default function Board({
                 key={gem.id}
                 data-pos={`${r},${c}`}
                 data-testid={`gem-${r}-${c}`}
-                onClick={() => !isEmpty && onSelect(r, c)}
+                onClick={() => {
+                  if (!isEmpty) {
+                    spawnStream(r, c, gem.type);
+                    onSelect(r, c);
+                  }
+                }}
                 className={cn(
                   "relative w-full h-full flex items-center justify-center transition-all duration-300 tile",
                   isSelected && "scale-110 z-10",

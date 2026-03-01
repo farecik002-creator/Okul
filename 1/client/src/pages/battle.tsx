@@ -450,29 +450,36 @@ function Battle({ level, playerStats, onWin, onExit }: { level: number; playerSt
     setIsExpGlow(true);
     setTimeout(() => setIsExpGlow(false), 400);
 
-    if (type === 'purple') {
+    if (type === "purple") {
       const amount = count * 5;
       setShield(prev => prev + amount);
       spawnFloatingText(`+${amount} Shield`, "text-purple-400");
       setIsShieldGlow(true);
+      const shieldBar = document.querySelector(".shield-impact-target");
+      if (shieldBar) {
+        shieldBar.classList.add("shield-impact");
+        setTimeout(() => shieldBar.classList.remove("shield-impact"), 250);
+      }
       setTimeout(() => setIsShieldGlow(false), 500);
-    } else if (type === 'green') {
+    } else if (type === "green") {
       const amount = count * 3;
       setPlayerHp((prev: number) => Math.min(maxHp, prev + amount));
       spawnFloatingText(`+${amount} HP`, "text-green-400");
       setIsHealGlow(true);
+      const hpBar = document.querySelector(".hp-impact-target");
+      if (hpBar) {
+        hpBar.classList.add("hp-impact");
+        setTimeout(() => hpBar.classList.remove("hp-impact"), 250);
+      }
       setTimeout(() => setIsHealGlow(false), 300);
-    } else if (type === 'red') {
+    } else if (type === "red") {
       setCritDamage(true);
       setTimeout(() => setCritDamage(false), 1000);
-    } else if (type === 'blue') {
+    } else if (type === "blue") {
       setSkillCharge(prev => Math.min(100, prev + (count * 10)));
-    } else if (type === 'yellow') {
+    } else if (type === "yellow") {
       setHealCharge(prev => Math.min(100, prev + (count * 10)));
     }
-
-    const baseDmg = count * (baseDamage / 2);
-    const comboMultiplier = 1 + (currentCombo - 1) * 0.5;
     const totalDamage = Math.floor(baseDmg * comboMultiplier);
     setEnemyHp(prev => Math.max(0, prev - totalDamage));
     if (currentCombo > 1) spawnParticles(5);
